@@ -4,6 +4,7 @@ export class LightState {
     sat: number;
     bri: number;
     ct: number;
+    colormode: string;
 
     constructor({isOn = true, hue = 65280, saturation = 254, brightness = 254, ct = -1}) {
         this.on = isOn;

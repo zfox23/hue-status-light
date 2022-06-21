@@ -31,8 +31,11 @@ import './index.css';
 import { LightState } from './lightStates';
 
 const setCurrentColorEl = (result: LightState) => {
+    console.log(result)
     const currentColor: HTMLDivElement = document.querySelector(".currentColor");
-    if (result.ct) {
+    if (!result.on) {
+        currentColor.style.backgroundColor = "#000000";
+    } else if (result.colormode === "ct" && result.ct) {
         currentColor.style.backgroundColor = "#fff3c9";
     } else if (result.on) {
         const temp = `hsl(${Math.round(linearScale(result.hue, 0, 65535, 0, 360))}deg, ${result.sat / 254 * 100}%, 50%)`;
