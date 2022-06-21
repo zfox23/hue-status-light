@@ -1,7 +1,7 @@
 {
   "name": "hue-status-light",
   "productName": "hue-status-light",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "An interface to our Hue lights for use as a status indicator, so I know when it's OK for me to enter my wife's office.",
   "main": ".webpack/main",
   "scripts": {

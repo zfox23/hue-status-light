@@ -31,11 +31,9 @@ import './index.css';
 import { LightState } from './lightStates';
 
 const setCurrentColorEl = (result: LightState) => {
-    console.log(result)
+    console.log(result);
     const currentColor: HTMLDivElement = document.querySelector(".currentColor");
-    if (!result.on) {
-        currentColor.style.backgroundColor = "#000000";
-    } else if (result.colormode === "ct" && result.ct) {
+    if (result.colormode === "ct" && result.ct) {
         currentColor.style.backgroundColor = "#fff3c9";
     } else if (result.on) {
         const temp = `hsl(${Math.round(linearScale(result.hue, 0, 65535, 0, 360))}deg, ${result.sat / 254 * 100}%, 50%)`;
@@ -80,5 +78,4 @@ const setLightState = async (newState: string) => {
 document.querySelector(".button__off").addEventListener("click", async () => { setLightState("off"); });
 document.querySelector(".button__normal").addEventListener("click", async () => { setLightState("normal"); });
 document.querySelector(".button__free").addEventListener("click", async () => { setLightState("free"); });
-document.querySelector(".button__uncertain").addEventListener("click", async () => { setLightState("uncertain"); });
 document.querySelector(".button__busy").addEventListener("click", async () => { setLightState("busy"); });

@@ -15,9 +15,11 @@ export class LightState {
         
         if (ct > -1) {
             this.ct = ct;
+            this.colormode = "ct";
         } else {
             this.hue = hue;
             this.sat = saturation;
+            this.colormode = "hs";
         }
         this.bri = brightness;
     }
