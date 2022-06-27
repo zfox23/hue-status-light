@@ -1,0 +1,60 @@
+{
+    "description": "The colored dot icon in the Firefox toolbar lets you choose the color of your Hue status light.",
+    "manifest_version": 2,
+    "name": "Hue Status Light",
+    "version": "0.1",
+    "homepage_url": "https://github.com/zfox23/hue-status-light",
+    "icons": {
+        "512": "icons/icon-512.png"
+    },
+    "permissions": [
+        "*://192.168.1.30/*",
+        "storage"
+    ],
+    "browser_action": {
+        "default_icon": "icons/icon-512-off.png",
+        "default_title": "Hue Status Icon",
+        "default_popup": "popup/index.html"
+    },
+    "commands": {
+        "warm-white": {
+            "suggested_key": {
+                "default": "Ctrl+Alt+3"
+            },
+            "description": "Set the status light to \"Warm White\"."
+        },
+        "available": {
+            "suggested_key": {
+                "default": "Ctrl+Alt+1"
+            },
+            "description": "Set the status light to \"Available\" (green)."
+        },
+        "busy": {
+            "suggested_key": {
+                "default": "Ctrl+Alt+2"
+            },
+            "description": "Set the status light to \"Busy\" (red)."
+        },
+        "off": {
+            "suggested_key": {
+                "default": "Ctrl+Alt+0"
+            },
+            "description": "Set the status light to \"Off\"."
+        }
+    },
+    "background": {
+        "scripts": [
+            "background-scripts/background.js"
+        ]
+    },
+    "options_ui": {
+        "page": "options/options.html",
+        "browser_style": true
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "HueStatusLight@afriendlyfox.com",
+            "strict_min_version": "42.0"
+        }
+    }
+}

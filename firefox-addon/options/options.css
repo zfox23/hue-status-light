@@ -1,0 +1,15 @@
+.authorizeForm {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+        Arial, sans-serif;
+    margin: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.authorizeForm > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
