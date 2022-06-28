@@ -29,6 +29,17 @@ const WARM_WHITE_LIGHT_STATE = new LightState({ ct: 170 });
 const AVAILABLE_LIGHT_STATE = new LightState({ hue: 25500 });
 const BUSY_LIGHT_STATE = new LightState({ hue: 2 });
 
+const clamp = (value, min, max) => {
+    return Math.min(Math.max(value, min), max);
+}
+
+const linearScale = (factor, minInput, maxInput, minOutput, maxOutput) => {
+    factor = clamp(factor, minInput, maxInput);
+
+    return minOutput + (maxOutput - minOutput) *
+        (factor - minInput) / (maxInput - minInput);
+}
+
 const updateExtensionButton = async () => {
     console.log(`Updating extension icon...`);
 
@@ -65,16 +76,24 @@ const updateExtensionButton = async () => {
                 }
             });
             break;
+        case "unknown":
+            await browser.browserAction.setIcon({
+                path: {
+                    512: "icons/icon-512.png"
+                }
+            });
+            break;
         default:
             console.warn(`\`updateExtensionButton()\` called with unknown \`currentLightStateName\`:\n${currentLightStateName}`);
             break;
     }
 }
 
-let currentLightStateName = "off";
+let currentLightStateName = "unknown";
 const setLightState = async (newLightStateName) => {
-    const { hueIP, hueUsername } = await browser.storage.sync.get(['hueIP', 'hueUsername']);
-    if (!(hueIP && hueUsername)) {
+    if (!(HUE_IP && HUE_USERNAME)) {
+        currentLightStateName = "unknown";
+        updateExtensionButton();
         return;
     }
 
@@ -107,7 +126,7 @@ const setLightState = async (newLightStateName) => {
 
     let failed = false;
     relevantLightIDs.forEach(async (lightID) => {
-        const url = `http://${hueIP}/api/${hueUsername}/lights/${lightID}/state`;
+        const url = `http://${HUE_IP}/api/${HUE_USERNAME}/lights/${lightID}/state`;
         failed = failed || !(await fetch(url, {
             method: 'put',
             body
@@ -129,7 +148,10 @@ const onMessage = async ({ command, arg }) => {
     switch (command) {
         case "setLightState":
             await setLightState(arg);
-            return currentLightStateName;
+            return { currentLightStateName };
+        case "updateCurrentLightState":
+            updateCurrentLightState();
+            return { currentLightStateName };
         case "getCurrentLightStateName":
             return currentLightStateName;
         case "openOptionsPage":
@@ -155,17 +177,18 @@ browser.commands.onCommand.addListener((command) => {
 
 let relevantLightIDs = [];
 const getLightInfo = async () => {
-    const { hueIP, hueUsername, statusLightNames } = await browser.storage.sync.get(['hueIP', 'hueUsername', 'statusLightNames']);
-    if (!(hueIP && hueUsername && statusLightNames)) {
+    if (!(HUE_IP && HUE_USERNAME && STATUS_LIGHT_NAMES)) {
+        currentLightStateName = "unknown";
+        updateExtensionButton();
         return;
     }
 
-    const statusLightNamesArray = statusLightNames.split(";");
+    const statusLightNamesArray = STATUS_LIGHT_NAMES.split(";");
 
-    console.log(`Getting relevant Light IDs from Hue bridge at \`${hueIP}\`...`);
+    console.log(`Getting relevant Light IDs from Hue bridge at \`${HUE_IP}\`...`);
     relevantLightIDs = [];
     try {
-        const response = await fetch(`http://${hueIP}/api/${hueUsername}/lights`);
+        const response = await fetch(`http://${HUE_IP}/api/${HUE_USERNAME}/lights`);
         const lightsJSON = await response.json();
         const keys = Object.keys(lightsJSON);
         for (let i = 0; i < keys.length; i++) {
@@ -177,24 +200,29 @@ const getLightInfo = async () => {
         return true;
     } catch (err) {
         console.error(err);
+        currentLightStateName = "unknown";
+        updateExtensionButton();
         return false;
     }
 }
 
-const getCurrentLightState = async () => {
-    const { hueIP, hueUsername } = await browser.storage.sync.get(['hueIP', 'hueUsername']);
-    if (!(hueIP && hueUsername)) {
-        return;
+const updateCurrentLightState = async () => {
+    if (!(HUE_IP && HUE_USERNAME)) {
+        currentLightStateName = "unknown";
+        updateExtensionButton();
+        return undefined;
     }
 
     const gotLightInfo = await getLightInfo();
     if (!gotLightInfo) {
         console.error(`setLightState(): Couldn't get light info!`);
+        currentLightStateName = "unknown";
+        updateExtensionButton();
         return undefined;
     }
 
     try {
-        const response = await fetch(`http://${hueIP}/api/${hueUsername}/lights/${relevantLightIDs[0]}`);
+        const response = await fetch(`http://${HUE_IP}/api/${HUE_USERNAME}/lights/${relevantLightIDs[0]}`);
         const lightsJSON = await response.json();
         const currentState = lightsJSON.state;
 
@@ -209,18 +237,56 @@ const getCurrentLightState = async () => {
         } else {
             currentLightStateName = "off";
         }
-        console.log(`getCurrentLightState(): Current light state name is:\n\`${currentLightStateName}\``);
+        console.log(`updateCurrentLightState(): Current light state name is:\n\`${currentLightStateName}\``);
 
         updateExtensionButton();
+
+        return currentLightStateName;
     } catch (err) {
         console.error(err);
+        currentLightStateName = "unknown";
+        updateExtensionButton();
+        return undefined;
     }
-
-    return undefined;
 }
 
+let HUE_IP, HUE_USERNAME, STATUS_LIGHT_NAMES;
+const onStorageChanged = (changes, area) => {
+    const changedItems = Object.keys(changes);
+
+    let changed = false;
+    for (let item of changedItems) {
+        switch (item) {
+            case "hueIP":
+                HUE_IP = changes[item].newValue;
+                changed = true;
+                break;
+            case "hueUsername":
+                HUE_USERNAME = changes[item].newValue;
+                changed = true;
+                break;
+            case "statusLightNames":
+                STATUS_LIGHT_NAMES = changes[item].newValue;
+                changed = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (changed) {
+        updateCurrentLightState();
+    }
+}
+browser.storage.onChanged.addListener(onStorageChanged);
+
 const start = async () => {
+    const { hueIP, hueUsername, statusLightNames } = await browser.storage.sync.get(['hueIP', 'hueUsername', 'statusLightNames']);
+    HUE_IP = hueIP;
+    HUE_USERNAME = hueUsername;
+    STATUS_LIGHT_NAMES = statusLightNames;
+
     await getLightInfo();
-    await getCurrentLightState();
+    await updateCurrentLightState();
 }
 start();

@@ -15,18 +15,11 @@ body {
     display: none;
 }
 
-.currentColor {
-    width: 100%;
-    max-width: 96px;
-    height: 96px;
-    border-radius: 100%;
-    margin: 0 auto;
-}
-
 .buttonContainer {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    margin-bottom: 32px;
 }
 
 .button {
@@ -39,8 +32,9 @@ body {
     text-overflow: "";
     overflow: hidden;
     white-space: nowrap;
-    padding: 2px 8px;
+    padding: 8px 16px;
     cursor: pointer;
+    background-color: transparent;
 }
 .button:hover {
     box-shadow: rgba(0, 0, 0, 0.6) 3px 3px 5px;
@@ -51,37 +45,58 @@ body {
 }
 
 .button__off {
+    background-color: transparent;
+    border: 8px solid black;
+    color: black;
+}
+.button__off.selected {
     background-color: black;
     color: white;
 }
 .button__normal {
+    background-color: transparent;
+    border: 8px solid #fff3c9;
+    color: black;
+}
+.button__normal.selected {
     background-color: #fff3c9;
     color: black;
 }
 .button__free {
+    background-color: transparent;
+    border: 8px solid #1af04c;
+    color: black;
+}
+.button__free.selected {
     background-color: #1af04c;
     color: black;
 }
 .button__busy {
+    background-color: transparent;
+    border: 8px solid #f02f1a;
+    color: black;
+}
+.button__busy.selected {
     background-color: #f02f1a;
     color: white;
 }
 
-.openOptionsButton {
-    width: 24px;
-    height: 24px;
+.gearButton {
+    width: 32px;
+    height: 32px;
     background-image: url('./settings.svg');
     background-color: transparent;
     background-repeat: no-repeat;
     background-position: center center;
+    background-size: 20px;
     border: none;
-    padding: 2px;
     cursor: pointer;
     position: absolute;
     bottom: 4px;
     right: 4px;
+    border-radius: 4px;
 }
 
-.openOptionsButton:hover {
+.gearButton:hover {
     background-color: #EEEEEE;
 }

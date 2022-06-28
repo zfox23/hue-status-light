@@ -2,7 +2,7 @@
     "description": "The colored dot icon in the Firefox toolbar lets you choose the color of your Hue status light.",
     "manifest_version": 2,
     "name": "Hue Status Light",
-    "version": "0.1",
+    "version": "0.2",
     "homepage_url": "https://github.com/zfox23/hue-status-light",
     "icons": {
         "512": "icons/icon-512.png"
@@ -12,7 +12,7 @@
         "storage"
     ],
     "browser_action": {
-        "default_icon": "icons/icon-512-off.png",
+        "default_icon": "icons/icon-512.png",
         "default_title": "Hue Status Icon",
         "default_popup": "popup/index.html"
     },
